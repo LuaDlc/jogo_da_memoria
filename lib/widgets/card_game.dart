@@ -3,16 +3,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:jogo_da_memoria/theme.dart';
+import 'package:provider/provider.dart';
 import '../constants.dart';
+import '../controllers/game_controller.dart';
+import '../models/game_opcao.dart';
 
 class CardGame extends StatefulWidget {
   final Modo modo;
-  final int opcao;
+  final GameOpcao gameOpcao;
 
   const CardGame({
     Key? key,
     required this.modo,
-    required this.opcao,
+    required this.gameOpcao,
   }) : super(key: key);
 
   @override
@@ -40,15 +43,23 @@ class _CardGameState extends State<CardGame>
   }
 
   flipCard() {
-    if (animation.isAnimating) {
+    final game = context.read<GameController>();
+    if (!animation.isAnimating &&
+        !widget.gameOpcao.matched! &&
+        !widget.gameOpcao.selected! &&
+        !game.jogadaCompleta) {
       animation.forward();
-      Timer(const Duration(seconds: 2), () => animation.reverse());
+      game.escolher(widget.gameOpcao, resetCard);
     }
+  }
+
+  resetCard() {
+    animation.reverse();
   }
 
   AssetImage getImage(double angulo) {
     if (angulo > 0.5 * pi) {
-      return AssetImage('images/${widget.opcao.toString()}.png');
+      return AssetImage('images/${widget.gameOpcao.opcao.toString()}.png');
     } else {
       return widget.modo == Modo.normal
           ? const AssetImage('images/card_normal.png')
